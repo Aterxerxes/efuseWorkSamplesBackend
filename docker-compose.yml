@@ -1,0 +1,53 @@
+services:
+
+  api:
+    container_name: nestjs_api
+    build:
+      dockerfile: Dockerfile
+      context: .
+      # Only will build development stage from our dockerfile
+      target: development
+    volumes:
+      - .:/usr/src/app
+    env_file:
+    - .env
+    # Run a command against the devlopment stage of the image
+    # command: npm run start:dev
+    command: npm run start:dev
+    networks:
+      - nextjs-network
+    ports:
+      - 3000:3000
+    depends_on:
+      - redis
+      - mongodb
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis:/data
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongoadmin
+      MONGO_INITDB_ROOT_PASSWORD: supersupersecret
+    volumes:
+      - ./database:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - nextjs-network
+    restart: always
+
+networks:
+  nextjs-network:
+    driver: bridge
+
+volumes:
+  redis:
+    driver: local
+  
