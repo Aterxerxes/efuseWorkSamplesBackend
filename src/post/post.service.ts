@@ -1,15 +1,42 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, HttpException, Injectable } from '@nestjs/common';
+
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { InjectModel, InjectConnection } from '@nestjs/mongoose';
+import mongoose, { Model, Connection } from 'mongoose';
+import { Post } from './entities/post.entity';
 
 @Injectable()
 export class PostService {
-  create(createPostDto: CreatePostDto) {
-    return 'This action adds a new post';
+  constructor(
+    @InjectConnection() private connection: Connection,
+    @InjectModel('Post') private readonly postModel: Model<Post>,
+  ) {}
+
+  async create(createPostDto: CreatePostDto) {
+    const newPost = new this.postModel({
+      ...createPostDto,
+    });
+
+    try {
+      const result = await newPost.save();
+      delete result._id;
+      return {
+        message: 'Successfully Saved',
+        post: result,
+      };
+    } catch (error) {
+      if (error instanceof mongoose.Error.ValidationError) {
+        return {
+          message: 'Invalid Parameters',
+          errors: Object.keys(error.errors),
+        };
+      }
+      throw new HttpException('Error creating Post.', HttpStatus.BAD_REQUEST);
+    }
   }
 
   findAll() {
-    // TODO: Make this connect to the MongoDB
     return `This action returns all post`;
   }
 

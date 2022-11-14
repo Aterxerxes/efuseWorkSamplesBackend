@@ -5,9 +5,15 @@ import * as redisStore from 'cache-manager-redis-store';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PostModule } from './post/post.module';
-console.log('==================================');
-console.log('Bacon MongoDB Connection String:', process.env.MONGODB_CONNSTRING);
-console.log('==================================');
+
+const getConnectionString = (database) => {
+  const result =
+    process.env.MONGODB_CONNSTRING +
+    database +
+    process.env.MONGODB_CONN_OPTIONS;
+  return result;
+};
+
 @Module({
   controllers: [AppController],
   providers: [AppService],
@@ -20,7 +26,7 @@ console.log('==================================');
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT,
     }),
-    MongooseModule.forRoot(process.env.MONGODB_CONNSTRING),
+    MongooseModule.forRoot(getConnectionString('efuse')),
     PostModule,
   ],
 })

@@ -6,14 +6,13 @@ services:
       dockerfile: Dockerfile
       context: .
       # Only will build development stage from our dockerfile
-      target: development
+      # target: development
     volumes:
       - .:/usr/src/app
     env_file:
     - .env
     # Run a command against the devlopment stage of the image
     # command: npm run start:dev
-    command: npm run start:dev
     networks:
       - nextjs-network
     ports:
@@ -35,8 +34,10 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongoadmin
       MONGO_INITDB_ROOT_PASSWORD: supersupersecret
+      MONGO_INITDB_DATABASE: efuse
     volumes:
       - ./database:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     ports:
       - 27017:27017
     networks:

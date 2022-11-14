@@ -3,25 +3,21 @@ import { HydratedDocument } from 'mongoose';
 
 export type PostDocument = HydratedDocument<Post>;
 
-@Schema()
+@Schema({
+  timestamps: {
+    createdAt: 'created_time',
+    updatedAt: 'upddated_time',
+  },
+})
 export class Post {
   @Prop({
-    index: true,
-    unique: true,
     required: true,
   })
-  id: string;
-
-  @Prop()
   user_id: string;
 
-  @Prop()
-  created_time: string;
-
-  @Prop()
-  updated_time: string;
-
-  @Prop()
+  @Prop({
+    required: true,
+  })
   content: string;
 }
 
