@@ -2,16 +2,13 @@ import { HttpStatus, HttpException, Injectable } from '@nestjs/common';
 
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { InjectModel, InjectConnection } from '@nestjs/mongoose';
-import mongoose, { Model, Connection } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import mongoose, { Model } from 'mongoose';
 import { Post } from './entities/post.entity';
 
 @Injectable()
 export class PostService {
-  constructor(
-    @InjectConnection() private connection: Connection,
-    @InjectModel('Post') private readonly postModel: Model<Post>,
-  ) {}
+  constructor(@InjectModel('Post') private readonly postModel: Model<Post>) {}
 
   async create(createPostDto: CreatePostDto) {
     const newPost = new this.postModel({
@@ -36,19 +33,55 @@ export class PostService {
     }
   }
 
-  findAll() {
-    return `This action returns all post`;
+  async findAll() {
+    try {
+      const posts = await this.postModel.find();
+      return {
+        posts,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
+  async findOne(id: string) {
+    try {
+      const post = await this.postModel.findById(id);
+      return {
+        post,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  async update(updatePostDto: UpdatePostDto) {
+    try {
+      const response = await this.postModel.updateOne(
+        { _id: updatePostDto.id },
+        { content: updatePostDto.content },
+      );
+      if (response.acknowledged) {
+        const post = await this.postModel.findById(updatePostDto.id);
+        return {
+          succes: true,
+          updated: post,
+        };
+      }
+    } catch (error) {
+      throw error;
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  async remove(id: string) {
+    try {
+      const post = await this.postModel.findByIdAndRemove(id);
+      return {
+        success: !!post,
+        removed: post,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }
