@@ -26,6 +26,7 @@ const getConnectionString = (database) => {
       store: redisStore,
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT,
+      ttl: 30,
     }),
     MongooseModule.forRoot(getConnectionString('efuse')),
     PostModule,
